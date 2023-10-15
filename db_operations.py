@@ -32,6 +32,20 @@ def select_all():
         return movies_list
 
 
+def select(id):
+    with app.app_context():
+        movie = db.session.execute(db.select(Movie).where(Movie.id == id)).scalar()
+        return movie
+
+
+def update_movie(id, rating, review):
+    with app.app_context():
+        movie_to_update = db.session.execute(db.select(Movie).where(Movie.id == id)).scalar()
+        movie_to_update.rating = rating
+        movie_to_update.review = review
+        db.session.commit()
+
+
 with app.app_context():
     db.create_all()
 

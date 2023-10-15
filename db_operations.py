@@ -46,6 +46,13 @@ def update_movie(id, rating, review):
         db.session.commit()
 
 
+def delete_movie(id):
+    with app.app_context():
+        movie_to_delete = db.session.execute(db.select(Movie).where(Movie.id == id)).scalar()
+        db.session.delete(movie_to_delete)
+        db.session.commit()
+
+
 with app.app_context():
     db.create_all()
 

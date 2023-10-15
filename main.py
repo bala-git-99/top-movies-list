@@ -47,5 +47,11 @@ def update(id):
     return render_template("edit.html", movie=select(id), form=form)
 
 
+@app.route("/delete/<int:id>")
+def delete(id):
+    delete_movie(id)
+    return redirect(url_for('home'))
+
+
 if __name__ == '__main__':
     app.run(debug=True)

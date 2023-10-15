@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 import requests
+from db_operations import *
 
 '''
 Red underlines? Install the required packages first: 
@@ -26,7 +27,8 @@ Bootstrap5(app)
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    movies = select_all()
+    return render_template("index.html", movies=movies)
 
 
 if __name__ == '__main__':

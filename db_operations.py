@@ -1,5 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+import requests
+from parameters import *
 
 db = SQLAlchemy()
 app = Flask(__name__)
@@ -13,7 +15,7 @@ class Movie(db.Model):
     year = db.Column(db.Integer, nullable=False)
     description = db.Column(db.String(500))
     rating = db.Column(db.Float)
-    ranking = db.Column(db.Integer, nullable=False)
+    ranking = db.Column(db.Integer, nullable=True)
     review = db.Column(db.String(500))
     img_url = db.Column(db.String(250))
 
@@ -80,4 +82,49 @@ second_movie = Movie(
     review="I liked the water.",
     img_url="https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg"
 )
+
+
 # second_movie.create()
+
+
+def get_movie(movie_title):
+    parameters = {
+        "query": movie_title,
+    }
+    headers = {
+        "accept": "application/json",
+        "Authorization": f"Bearer {TMDB_READ_ACCESS_TOKEN}"
+    }
+    response = requests.get(url="https://api.themoviedb.org/3/search/movie", params=parameters, headers=headers)
+    movie_titles = []
+    for movie in response.json()["results"]:
+        temp_movie = {
+            'id': movie['id'],
+            'title': movie['title'],
+            'release_date': movie['release_date'],
+            'overview': movie['overview'],
+            'poster_path': movie['poster_path'],
+        }
+        movie_titles.append(temp_movie)
+    return movie_titles
+
+
+def add_movie(id):
+    headers = {
+        "accept": "application/json",
+        "Authorization": f"Bearer {TMDB_READ_ACCESS_TOKEN}"
+    }
+    response = requests.get(url=f"https://api.themoviedb.org/3/movie/{id}", headers=headers)
+    movie = response.json()
+    print(movie['title'], movie['release_date'])
+
+    temp_movie = Movie(
+        id=movie['id'],
+        title=movie['title'],
+        year=movie['release_date'],
+        description=movie['overview'],
+        img_url=f"https://image.tmdb.org/t/p/w500{movie['backdrop_path']}"
+    )
+    temp_movie.create()
+
+

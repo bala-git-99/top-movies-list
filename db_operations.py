@@ -1,6 +1,8 @@
+import requests
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-import requests
+from sqlalchemy import desc
+
 from parameters import *
 
 db = SQLAlchemy()
@@ -27,11 +29,22 @@ class Movie(db.Model):
 
 def select_all():
     with app.app_context():
-        all_movies = db.session.execute(db.select(Movie)).scalars()
+        all_movies = db.session.execute(db.select(Movie).order_by(desc(Movie.rating))).scalars()
+        rank = 1
         movies_list = []
         for movie in all_movies:
+            add_rank(movie.id, rank)
+            rank += 1
             movies_list.append(movie)
+        movies_list.reverse()
         return movies_list
+
+
+def add_rank(id, rank):
+    with app.app_context():
+        movie_to_update = db.session.execute(db.select(Movie).where(Movie.id == id)).scalar()
+        movie_to_update.ranking = rank
+        db.session.commit()
 
 
 def select(id):
@@ -126,5 +139,3 @@ def add_movie(id):
         img_url=f"https://image.tmdb.org/t/p/w500{movie['backdrop_path']}"
     )
     temp_movie.create()
-
-
